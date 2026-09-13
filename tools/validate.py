@@ -45,18 +45,31 @@ def validate(binary, manifest=ROOT / 'abi/aspyr-bnw.json', app=None):
     if not re.search(r'version ' + re.escape(abi['deployment_target']) + r'\s', deployment):
         raise ValueError('incorrect deployment target')
     allowed = set()
+    engine_allowed = set()
     for key in ['stock_imports', 'host_exports', 'system_imports']:
-        allowed.update((manifest.parent / abi[key]).read_text().splitlines())
+        symbols = set((manifest.parent / abi[key]).read_text().splitlines())
+        allowed.update(symbols)
+        if key != 'system_imports':
+            engine_allowed.update(symbols)
     imports = set(output('nm', '-u', str(binary)).splitlines())
     extra = imports - allowed
     if extra:
         raise ValueError('imports absent from ABI allowlist:\n' + '\n'.join(sorted(extra)))
+    dynamic = set(re.findall(r'\bexternal\s+(\S+)\s+\(dynamically looked up\)',
+                             output('nm', '-mu', str(binary))))
+    if dynamic - engine_allowed:
+        raise ValueError('unresolved engine imports absent from stock/host:\n' + '\n'.join(sorted(dynamic - engine_allowed)))
+    libraries = output('otool', '-L', str(binary)).splitlines()[1:]
+    expected_libraries = {abi['install_name'], '/usr/lib/libc++.1.dylib', '/usr/lib/libSystem.B.dylib'}
+    if {line.strip().split(' (', 1)[0] for line in libraries} != expected_libraries:
+        raise ValueError('unexpected runtime library dependencies')
     if app:
         exe = Path(app) / 'Contents/MacOS/Civilization V'
         if sha256(exe) not in abi['host_executable_sha256']:
             raise ValueError('unsupported host executable hash')
     return {'abi_id': abi['abi_id'], 'sha256': sha256(binary),
-            'exports': sorted(exports), 'import_count': len(imports), 'validated': True}
+            'exports': sorted(exports), 'import_count': len(imports),
+            'dynamic_lookup_count': len(dynamic), 'validated': True}
 
 
 if __name__ == '__main__':

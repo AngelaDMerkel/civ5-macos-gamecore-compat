@@ -1,5 +1,6 @@
 #include "Windows.h"
 #include "tchar.h"
+#include "civ5/serialization.h"
 #include <cassert>
 #include <thread>
 #include <vector>
@@ -9,6 +10,8 @@ static_assert(sizeof(void*) == 8, "Aspyr requires 64-bit pointers");
 static_assert(sizeof(DWORD) == 4 && sizeof(LONG) == 4 && sizeof(ULONG) == 4,
               "Win32 integer widths must survive LP64");
 static_assert(sizeof(GUID) == 16 && alignof(GUID) == 4, "GUID ABI");
+static_assert(offsetof(GUID, Data1) == 0 && offsetof(GUID, Data2) == 4 &&
+              offsetof(GUID, Data3) == 6 && offsetof(GUID, Data4) == 8, "GUID stream fields");
 static_assert(sizeof(FILETIME) == 8 && sizeof(SYSTEMTIME) == 16, "time ABI");
 static_assert(sizeof(POINT) == 8 && sizeof(LARGE_INTEGER) == 8, "integer ABI");
 static_assert(sizeof(TCHAR) == 1 && sizeof(wchar_t) == 4, "Aspyr character ABI");
@@ -44,4 +47,23 @@ int main() {
   const auto start = std::chrono::steady_clock::now();
   Sleep(2);
   assert(std::chrono::steady_clock::now() - start >= std::chrono::milliseconds(2));
+  struct Stream {
+    std::vector<unsigned char> bytes;
+    unsigned calls = 0;
+    void WriteIt(unsigned size, const void* data) {
+      ++calls;
+      const unsigned char* begin = static_cast<const unsigned char*>(data);
+      bytes.insert(bytes.end(), begin, begin + size);
+    }
+  } stream;
+  civ5_macos::WriteUInt64(stream, 0x0123456789abcdefULL);
+  assert(stream.calls == 1);
+  const std::vector<unsigned char> expected = {0xef, 0xcd, 0xab, 0x89, 0x67, 0x45, 0x23, 0x01};
+  assert(stream.bytes == expected);
+  stream.bytes.clear();
+  civ5_macos::WriteUInt64(stream, UINT64_MAX);
+  assert(stream.bytes == std::vector<unsigned char>(8, 0xff));
+  stream.bytes.clear();
+  civ5_macos::WriteUInt64(stream, 0);
+  assert(stream.bytes == std::vector<unsigned char>(8, 0));
 }
