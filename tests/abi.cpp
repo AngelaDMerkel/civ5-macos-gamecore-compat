@@ -30,4 +30,13 @@ int main() {
   assert(std::strcmp(_strrev(word), "dCbA") == 0);
   assert(std::strcmp(_strlwr(word), "dcba") == 0);
   assert(_stricmp("aBc", "ABC") == 0);
+  char integer[66];
+  assert(_i64toa_s(LLONG_MIN, integer, sizeof(integer), 10) == 0);
+  assert(std::strcmp(integer, "-9223372036854775808") == 0);
+  assert(_i64toa_s(LLONG_MAX, integer, sizeof(integer), 10) == 0);
+  assert(std::strcmp(integer, "9223372036854775807") == 0);
+  assert(_i64toa_s(-1, integer, sizeof(integer), 16) == 0);
+  assert(std::strcmp(integer, "ffffffffffffffff") == 0);
+  assert(_i64toa_s(10, integer, 2, 10) == ERANGE && integer[0] == 0);
+  assert(_i64toa_s(10, integer, sizeof(integer), 37) == EINVAL);
 }

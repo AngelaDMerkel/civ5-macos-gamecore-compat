@@ -19,6 +19,7 @@
 #include <unordered_map>
 #include <array>
 #include <climits>
+#include <cerrno>
 
 namespace std {
 #if __cplusplus >= 201703L
@@ -266,6 +267,27 @@ int strncpy_s(char* destination, std::size_t size, const char* source,
               std::size_t count);
 int wcscpy_s(wchar_t* destination, std::size_t size, const wchar_t* source);
 int _itoa_s(int value, char* buffer, std::size_t size, int radix);
+
+inline int _i64toa_s(long long value, char* buffer, std::size_t size, int radix) {
+  if (!buffer || !size) return EINVAL;
+  buffer[0] = '\0';
+  if (radix < 2 || radix > 36) return EINVAL;
+  const bool negative = value < 0 && radix == 10;
+  std::uint64_t magnitude = static_cast<std::uint64_t>(value);
+  if (negative) magnitude = 0 - magnitude; // also handles LLONG_MIN
+  char reversed[65];
+  std::size_t count = 0;
+  do {
+    reversed[count++] = "0123456789abcdefghijklmnopqrstuvwxyz"[magnitude % radix];
+    magnitude /= radix;
+  } while (magnitude);
+  if (count + (negative ? 1 : 0) + 1 > size) return ERANGE;
+  std::size_t offset = 0;
+  if (negative) buffer[offset++] = '-';
+  while (count) buffer[offset++] = reversed[--count];
+  buffer[offset] = '\0';
+  return 0;
+}
 
 template <std::size_t Size>
 inline int sprintf_s(char (&buffer)[Size], const char* format, ...) {
