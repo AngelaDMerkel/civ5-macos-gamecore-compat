@@ -50,6 +50,10 @@ def package(args):
     with tempfile.TemporaryDirectory(prefix='civ5-release-') as temporary:
         stage = Path(temporary)
         shutil.copy2(args.binary, stage / BINARY)
+        # Sign before hashing; installation must copy these exact verified bytes.
+        subprocess.run(['codesign', '--force', '--sign', '-', '--timestamp=none', str(stage / BINARY)], check=True)
+        subprocess.run(['codesign', '--verify', '--strict', str(stage / BINARY)], check=True)
+        validated = validate(stage / BINARY)
         for value in args.payload:
             name, directory = value.split('=', 1)
             if not re.fullmatch(r'[A-Za-z0-9_-]+', name) or name in destinations:
@@ -79,6 +83,7 @@ def package(args):
             'destinations': {'gamecore': 'Contents/MacOS/' + BINARY, 'payload': destinations},
             'licenses': sorted(name for name in files if name.startswith('licenses/')),
             'runtime_validated': False,
+            'code_signing': 'ad-hoc',
         }
         (stage / 'manifest.json').write_text(json.dumps(manifest, indent=2, sort_keys=True) + '\n')
         sums = inventory(stage)

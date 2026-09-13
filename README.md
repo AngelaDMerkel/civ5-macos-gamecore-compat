@@ -30,3 +30,9 @@ install name, dylib versions, and a finite stock/host/system import allowlist.
 Neither builds nor validation write to the installed game.
 
 See [ABI contract](docs/abi.md) and [provenance](PROVENANCE.md).
+
+Release packaging ad-hoc signs the staged dylib before recording its hash.
+The installer verifies the signature and copies exactly those signed bytes.
+The validator separately requires every dynamic-lookup engine import to exist
+in the stock/host lists; additional system imports must bind to libc++ or
+libSystem through normal dylib dependencies.

@@ -1,5 +1,4 @@
 {
-  "sdk_validation": "x86_64-macos exports in macOS SDK text stubs",
   "additional_symbols": {
     "__ZNKSt3__16locale9has_facetERNS0_2idE": "libc++.1.tbd",
     "__ZNSt3__112basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEE7replaceEmmPKcm": "libc++.1.tbd",
@@ -15,8 +14,11 @@
     "__ZNSt3__114basic_iostreamIcNS_11char_traitsIcEEED0Ev": "libc++.1.tbd",
     "__ZNSt3__114basic_iostreamIcNS_11char_traitsIcEEED1Ev": "libc++.1.tbd",
     "__ZNSt3__114basic_iostreamIcNS_11char_traitsIcEEED2Ev": "libc++.1.tbd",
+    "__ZNSt3__16locale7classicEv": "libc++.1.tbd",
     "__ZNSt3__16localeC1ERKS0_": "libc++.1.tbd",
+    "__ZNSt3__16localeaSERKS0_": "libc++.1.tbd",
     "__ZNSt3__17codecvtIcc11__mbstate_tE2idE": "libc++.1.tbd",
+    "__ZNSt3__18ios_base5imbueERKNS_6localeE": "libc++.1.tbd",
     "__ZNSt8bad_castC1Ev": "libc++abi.tbd",
     "__ZNSt8bad_castD1Ev": "libc++abi.tbd",
     "__ZTINSt3__113basic_istreamIcNS_11char_traitsIcEEEE": "libc++.1.tbd",
@@ -44,5 +46,6 @@
     "_pthread_self": "system/libsystem_pthread.tbd",
     "_setbuf": "system/libsystem_c.tbd",
     "_strstr": "system/libsystem_c.tbd"
-  }
+  },
+  "sdk_validation": "x86_64-macos exports in macOS SDK text stubs"
 }
