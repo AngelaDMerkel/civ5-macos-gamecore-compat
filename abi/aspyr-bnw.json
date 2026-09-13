@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "abi_id": "aspyr-civ5-bnw-x86_64-10.11.6-v1",
+  "architecture": "x86_64",
+  "deployment_target": "10.11.6",
+  "install_name": "/libCvGameCoreDLL_Expansion2_DLL.dylib",
+  "compatibility_version": "1.0.0",
+  "current_version": "1.0.0",
+  "exports": [
+    "_DllGetGameContext"
+  ],
+  "stock_gamecore_sha256": [
+    "0da6a5ffc283c3f147b20a7ec426e4ed85a6838ab891faf61b50af4e25c4a09c"
+  ],
+  "host_executable_sha256": [
+    "d56d6bfbc0ef517fcb7cbaff46c42d1bdfab809c084684045761bd9d85807ee9"
+  ],
+  "stock_imports": "stock-imports.txt",
+  "host_exports": "host-exports.txt",
+  "system_imports": "system-imports.txt"
+}
