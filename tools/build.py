@@ -50,12 +50,6 @@ def build(config_path, jobs, incremental):
         raise ValueError('missing GameCore source directory')
     toolchain = output(compiler, '--version')
     fingerprint = hashlib.sha256(json.dumps([flags, toolchain, config], sort_keys=True).encode()).hexdigest()
-    recipe = object_dir / 'recipe.sha256'
-    reuse = incremental and recipe.exists() and recipe.read_text() == fingerprint
-    # Write the recipe only after a successful build. An interrupted flag change
-    # cannot cause old objects to be reused under a new recipe.
-    if recipe.exists() and not reuse:
-        recipe.unlink()
 
     failed = threading.Event()
 
@@ -65,8 +59,9 @@ def build(config_path, jobs, incremental):
         key = hashlib.sha256(str(src).encode()).hexdigest()[:16]
         obj = object_dir / (src.stem + '-' + key + '.o')
         dep = obj.with_suffix('.d')
+        recipe = obj.with_suffix('.recipe')
         current = False
-        if reuse and obj.exists() and dep.exists():
+        if incremental and obj.exists() and dep.exists() and recipe.exists() and recipe.read_text() == fingerprint:
             dependencies = shlex.split(dep.read_text().replace('\\\n', ' ').split(':', 1)[1])
             current = all(Path(d).is_file() and Path(d).stat().st_mtime_ns <= obj.stat().st_mtime_ns for d in dependencies)
         if not current:
@@ -79,6 +74,7 @@ def build(config_path, jobs, incremental):
                 temporary.unlink(missing_ok=True)
                 raise RuntimeError(src.name + '\n' + process.stdout + process.stderr)
             temporary.replace(obj)
+            recipe.write_text(fingerprint)
         return obj
 
     with ThreadPoolExecutor(max_workers=jobs) as pool:
@@ -92,7 +88,6 @@ def build(config_path, jobs, incremental):
     # Do not replace an existing good binary when ABI validation fails.
     subprocess.run([sys.executable, str(ROOT / 'tools/validate.py'), '--binary', str(temporary)], check=True)
     temporary.replace(binary)
-    recipe.write_text(fingerprint)
     report = {'product': product, 'compiler': toolchain, 'sources': len(sources),
               'compat_commit': output('git', '-C', str(ROOT), 'rev-parse', 'HEAD'),
               'source_commit': output('git', '-C', str(source), 'rev-parse', 'HEAD'),
