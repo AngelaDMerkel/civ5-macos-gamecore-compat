@@ -31,6 +31,7 @@ struct binary_function {
 #endif
 namespace tr1 {
 using std::shared_ptr;
+using std::hash;
 using std::unordered_set;
 using std::unordered_map;
 using std::array;
