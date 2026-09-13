@@ -88,6 +88,9 @@ typedef struct tagPOINT {
 typedef char CHAR;
 typedef wchar_t WCHAR;
 typedef const char* LPCSTR;
+// GameCore uses the MultiByte character set on Aspyr.
+typedef const char* LPCTSTR;
+typedef char* LPTSTR;
 typedef const wchar_t* LPCWSTR;
 typedef wchar_t* LPWSTR;
 typedef void* LPVOID;
