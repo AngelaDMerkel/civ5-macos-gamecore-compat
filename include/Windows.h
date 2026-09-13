@@ -20,6 +20,7 @@
 #include <array>
 #include <climits>
 #include <cerrno>
+#include <time.h>
 
 namespace std {
 #if __cplusplus >= 201703L
@@ -173,6 +174,11 @@ typedef pthread_mutex_t CRITICAL_SECTION;
 #define INVALID_FILE_SIZE ((DWORD)0xffffffffu)
 #define INVALID_FILE_ATTRIBUTES ((DWORD)0xffffffffu)
 #define ERROR_FILE_NOT_FOUND 2u
+#define ERROR_PATH_NOT_FOUND 3u
+#define ERROR_ACCESS_DENIED 5u
+#define ERROR_SHARING_VIOLATION 32u
+#define ERROR_LOCK_VIOLATION 33u
+#define S_OK 0
 
 #define DLL_PROCESS_DETACH 0
 #define DLL_PROCESS_ATTACH 1
@@ -219,6 +225,15 @@ int MultiByteToWideChar(UINT code_page, DWORD flags, LPCSTR input,
 void OutputDebugStringA(LPCSTR text);
 BOOL QueryPerformanceCounter(LARGE_INTEGER* value);
 BOOL QueryPerformanceFrequency(LARGE_INTEGER* value);
+DWORD timeGetTime(void);
+}
+
+inline DWORD GetTickCount() { return timeGetTime(); }
+inline DWORD GetCurrentThreadId() { return static_cast<DWORD>(pthread_mach_thread_np(pthread_self())); }
+inline void Sleep(DWORD milliseconds) {
+  timespec remaining = {static_cast<time_t>(milliseconds / 1000),
+                        static_cast<long>(milliseconds % 1000) * 1000000L};
+  while (nanosleep(&remaining, &remaining) == -1 && errno == EINTR) {}
 }
 
 #define OutputDebugString OutputDebugStringA

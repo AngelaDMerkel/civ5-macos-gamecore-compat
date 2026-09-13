@@ -1,0 +1,29 @@
+name: Build a pinned GameCore consumer
+on:
+  workflow_call:
+    inputs:
+      build-script:
+        required: true
+        type: string
+      artifact-name:
+        required: true
+        type: string
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build using the consumer's exact compatibility lock
+        env:
+          BUILD_SCRIPT: ${{ inputs.build-script }}
+          PYTHONDONTWRITEBYTECODE: '1'
+        run: bash "$BUILD_SCRIPT"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ inputs.artifact-name }}
+          path: |
+            build/macos/libCvGameCoreDLL_Expansion2_DLL.dylib
+            build/macos/build-report.json
+          if-no-files-found: error

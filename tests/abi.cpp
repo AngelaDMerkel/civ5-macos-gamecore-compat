@@ -3,6 +3,7 @@
 #include <cassert>
 #include <thread>
 #include <vector>
+#include <chrono>
 
 static_assert(sizeof(void*) == 8, "Aspyr requires 64-bit pointers");
 static_assert(sizeof(DWORD) == 4 && sizeof(LONG) == 4 && sizeof(ULONG) == 4,
@@ -39,4 +40,8 @@ int main() {
   assert(std::strcmp(integer, "ffffffffffffffff") == 0);
   assert(_i64toa_s(10, integer, 2, 10) == ERANGE && integer[0] == 0);
   assert(_i64toa_s(10, integer, sizeof(integer), 37) == EINVAL);
+  assert(GetCurrentThreadId() != 0);
+  const auto start = std::chrono::steady_clock::now();
+  Sleep(2);
+  assert(std::chrono::steady_clock::now() - start >= std::chrono::milliseconds(2));
 }

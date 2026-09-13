@@ -19,6 +19,8 @@ _fopen
 _fprintf
 _funlockfile
 _getenv
+_nanosleep
+_pthread_mach_thread_np
 _setvbuf
 _snprintf
 _strcasecmp

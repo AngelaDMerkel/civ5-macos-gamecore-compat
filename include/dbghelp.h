@@ -30,7 +30,6 @@ typedef LONG(WINAPI* LPTOP_LEVEL_EXCEPTION_FILTER)(EXCEPTION_POINTERS*);
 
 inline HANDLE GetCurrentProcess() { return nullptr; }
 inline DWORD GetCurrentProcessId() { return 0; }
-inline DWORD GetCurrentThreadId() { return 0; }
 inline DWORD GetLastError() { return 0; }
 inline void GetLocalTime(void*) {}
 inline BOOL SymInitialize(HANDLE, const char*, BOOL) { return FALSE; }

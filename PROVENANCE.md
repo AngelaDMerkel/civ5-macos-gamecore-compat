@@ -23,3 +23,7 @@ there are no wildcard exemptions. Adding imports requires explicit review.
 
 Local checkpoint records under `docs/local-*.json` are ignored and are not
 part of the distributable repository. No proprietary binary is distributed.
+
+The explicit `_nanosleep` and `_pthread_mach_thread_np` additions support VP
+thread yielding and diagnostics. Their exports were checked in the macOS SDK
+libsystem_c and libsystem_pthread `.tbd` files; the ABI test exercises both.
